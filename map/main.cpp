@@ -28,10 +28,9 @@ public:
             this->adj[i] = adj[i]; // Cópia dos dados
         }
 
-        InitializeNodePositions();
-
         Bind(wxEVT_PAINT, &GraphPanel::OnPaint, this);
         Bind(wxEVT_LEFT_DOWN, &GraphPanel::OnClick, this);
+        Bind(wxEVT_SIZE, &GraphPanel::OnResize, this);
     }
 
     ~GraphPanel()
@@ -50,14 +49,16 @@ private:
     int n;
     vector<wxColor> node_colors;
     vector<wxPoint> node_positions;
+    int panel_width, panel_height;
 
     void InitializeNodePositions()
     {
-        int minX = 0;
-        int maxX = 400;
-        int minY = 0;
-        int maxY = 400;
-        int min_distance = 40;
+        int min_distance = 30;
+
+        int minX = min_distance;
+        int maxX = panel_width - min_distance;
+        int minY = min_distance;
+        int maxY = panel_height - min_distance;
 
         // Inicializa a semente do rand() com o tempo atual
         srand(time(0));
@@ -65,7 +66,6 @@ private:
         for (int i = 0; i < n; i++)
         {
             bool valid_position;
-
             do
             {
                 valid_position = true;
@@ -75,7 +75,8 @@ private:
 
                 for (int j = 0; j < i; j++)
                 {
-                    if (sqrt(pow(new_position.x - node_positions[j].x, 2) + pow(new_position.y - node_positions[j].y, 2)) < min_distance)
+                    if (sqrt(pow(new_position.x - node_positions[j].x, 2) +
+                             pow(new_position.y - node_positions[j].y, 2)) < min_distance)
                     {
                         valid_position = false;
                         break;
@@ -131,13 +132,24 @@ private:
             }
         }
     }
+
+    void OnResize(wxSizeEvent &event)
+    {
+        wxSize panelSize = GetClientSize();
+        panel_width = panelSize.GetWidth();
+        panel_height = panelSize.GetHeight();
+
+        InitializeNodePositions();
+        Refresh();    // Redesenha o painel após redimensionar
+        event.Skip(); // Permite que o evento seja processado por outros manipuladores, se houver
+    }
 };
 
 class GraphFrame : public wxFrame
 {
 public:
     GraphFrame(const wxString &title, vector<int> adj[], int n)
-        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(600, 600))
+        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(800, 800))
     {
         wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
         panel = new GraphPanel(this, adj, n);
