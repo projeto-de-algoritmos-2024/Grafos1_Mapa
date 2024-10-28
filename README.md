@@ -40,7 +40,10 @@ xhost +local:docker
 docker run --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix cplusplus-wxwidgets-app
 ```
 
-4. No macOS, certifique-se de ter o **XQuartz** em execução. No Windows, use o **Xming** para suporte gráfico.
+4. No macOS, certifique-se de ter o **XQuartz** em execução. No Windows, use o **Xming** para suporte gráfico. Inicie o servidor X e marque a opção "No access control" para permitir conexões de outros hosts. Em seguida, execute o comando abaixo para rodar o container
+```bash
+docker run -e DISPLAY=host.docker.internal:0 cplusplus-wxwidgets-app
+```
 
 ## Uso 
 Explique como usar seu projeto caso haja algum passo a passo após o comando de execução.
