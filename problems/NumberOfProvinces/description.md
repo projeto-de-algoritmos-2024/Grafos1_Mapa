@@ -1,6 +1,6 @@
-# 547. Number of Provinces
+# [547. Number of Provinces](https://leetcode.com/problems/number-of-provinces/description/)
 
-Nível: Medium
+Level: Medium
 
 ## Description
 
