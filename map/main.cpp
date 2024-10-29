@@ -53,14 +53,14 @@ private:
     int panel_width, panel_height;
 
     void InitializeNodePositions()
-    {
+{
     int grid_size = ceil(sqrt(n)); // Define o tamanho da grade baseado na raiz quadrada do número de nós
     int padding = 50; // Espaçamento entre os nós e as bordas do painel
     int cell_width = (panel_width - 2 * padding) / grid_size;
     int cell_height = (panel_height - 2 * padding) / grid_size;
 
-        for (int i = 0; i < n; i++)
-        {
+    for (int i = 0; i < n; i++)
+    {
         int row = i / grid_size;
         int col = i % grid_size;
 
@@ -68,8 +68,8 @@ private:
         int y = padding + row * cell_height + cell_height / 2;
 
         node_positions[i] = wxPoint(x, y);
-        }
     }
+}
 
     void OnPaint(wxPaintEvent &event)
     {
@@ -91,6 +91,16 @@ private:
             dc.SetBrush(wxBrush(node_colors[i]));
             dc.DrawCircle(node_positions[i], 16);
             dc.DrawText(wxString::Format("%d", i), node_positions[i].x - 8, node_positions[i].y - 8);
+
+            // Se o nó é o "Start Point" ou "End Point", exibe o rótulo
+            if (selected_nodes.size() > 0 && i == selected_nodes[0])
+            {
+                dc.DrawText("Start Point", node_positions[i].x - 30, node_positions[i].y - 30);
+            }
+            if (selected_nodes.size() > 1 && i == selected_nodes[1])
+            {
+                dc.DrawText("End Point", node_positions[i].x - 30, node_positions[i].y + 25);
+            }
         }
     }
 
