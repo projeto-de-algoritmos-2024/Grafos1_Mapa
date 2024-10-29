@@ -49,6 +49,7 @@ private:
     int n;
     vector<wxColor> node_colors;
     vector<wxPoint> node_positions;
+    vector<int> selected_nodes;
     int panel_width, panel_height;
 
     void InitializeNodePositions()
@@ -104,9 +105,28 @@ private:
             if (click_pos.x >= node_positions[i].x - node_radius && click_pos.x <= node_positions[i].x + node_radius &&
                 click_pos.y >= node_positions[i].y - node_radius && click_pos.y <= node_positions[i].y + node_radius)
             {
-                // Altera a cor do nó clicado
-                node_colors[i] = (node_colors[i] == *wxBLUE) ? *wxRED : *wxBLUE;
-                Refresh(); // Redesenha o painel para aplicar a mudança de cor
+                if (find(selected_nodes.begin(), selected_nodes.end(), i) == selected_nodes.end())
+                {
+                    if (selected_nodes.size() < 2)
+                    {
+                        selected_nodes.push_back(i);
+                        node_colors[i] = *wxRED;
+                    }
+                    else
+                    {
+                        int first_selected = selected_nodes.front();
+                        node_colors[first_selected] = *wxBLUE;
+                        selected_nodes.erase(selected_nodes.begin());
+                        selected_nodes.push_back(i);
+                        node_colors[i] = *wxRED;
+                    }
+                }
+                else
+                {
+                    node_colors[i] = *wxBLUE;
+                    selected_nodes.erase(remove(selected_nodes.begin(), selected_nodes.end(), i), selected_nodes.end());
+                }
+                Refresh();
                 break;
             }
         }
