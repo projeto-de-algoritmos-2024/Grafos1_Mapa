@@ -53,41 +53,20 @@ private:
 
     void InitializeNodePositions()
     {
-        int min_distance = 30;
-
-        int minX = min_distance;
-        int maxX = panel_width - min_distance;
-        int minY = min_distance;
-        int maxY = panel_height - min_distance;
-
-        // Inicializa a semente do rand() com o tempo atual
-        srand(time(0));
+    int grid_size = ceil(sqrt(n)); // Define o tamanho da grade baseado na raiz quadrada do número de nós
+    int padding = 50; // Espaçamento entre os nós e as bordas do painel
+    int cell_width = (panel_width - 2 * padding) / grid_size;
+    int cell_height = (panel_height - 2 * padding) / grid_size;
 
         for (int i = 0; i < n; i++)
         {
-            bool valid_position;
-            do
-            {
-                valid_position = true;
-                int x = minX + rand() % (maxX - minX + 1);
-                int y = minY + rand() % (maxY - minY + 1);
-                wxPoint new_position(x, y);
+        int row = i / grid_size;
+        int col = i % grid_size;
 
-                for (int j = 0; j < i; j++)
-                {
-                    if (sqrt(pow(new_position.x - node_positions[j].x, 2) +
-                             pow(new_position.y - node_positions[j].y, 2)) < min_distance)
-                    {
-                        valid_position = false;
-                        break;
-                    }
-                }
+        int x = padding + col * cell_width + cell_width / 2;
+        int y = padding + row * cell_height + cell_height / 2;
 
-                if (valid_position)
-                {
-                    node_positions[i] = new_position;
-                }
-            } while (!valid_position);
+        node_positions[i] = wxPoint(x, y);
         }
     }
 
