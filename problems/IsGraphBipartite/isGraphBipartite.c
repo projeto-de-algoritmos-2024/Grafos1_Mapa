@@ -1,11 +1,15 @@
 # include <stdio.h>
 # include <stdlib.h>
+# include <stdbool.h>
 
 typedef struct no {
     int dado;
-    int camada;
     struct no *prox;
 } No;
+typedef struct {
+    int v;
+    int camada;
+} vNo;
 No *cria_fila(){
     No *fila = (No *) malloc(sizeof(No));
     if (fila != NULL){
@@ -14,11 +18,10 @@ No *cria_fila(){
     }
     return fila;
 }
-void enfileira(No *fila, int dado, int camada){
+void enfileira(No *fila, int dado){
     No *novo = (No *) malloc(sizeof(No));
     if (novo != NULL){
         novo->dado = dado;
-        novo->camada = camada;
         novo->prox = NULL;
         No *temp = fila;
         while (temp->prox != NULL) {
@@ -38,36 +41,39 @@ No *desenfileira(No *fila){
 int fila_vazia(No *fila){
     return (fila->prox == NULL);
 }
-
-int bfs(int **graph, int graphSize, No *fila, int *visited, int v){
+int bfs(int **graph, int graphSize, No *fila, vNo *visited, int v){
     int camada = 0;
-    visited[v] = 1;
-    enfileira(fila, v, camada);
+    visited[v].v = 1;
+    visited[v].camada = camada;
+    enfileira(fila, v);
     while(!fila_vazia(fila)){
         No *w = desenfileira(fila);
+        camada++;
         v = w->dado;
-        int vCamada = w->camada;
-        free(w);
+        int vCamada = visited[v].camada;
         for (int i=0; i < graphSize; i++){
-            if (graph[v][i] && visited[i] == 0){
-                visited[i] = 1;
-                enfileira(fila, i, vCamada+1);
+            if (graph[v][i] && visited[i].v == 0){
+                visited[i].v = 1;
+                visited[i].camada = camada;
+                enfileira(fila, i);
             }
-            if (graph[v][i] && visited[i] == 1){
-                if (vCamada == camada) return 0;
+            else if (graph[v][i] && visited[i].v == 1){
+                if (vCamada == visited[i].camada) return 0;
             }
         }
-        camada++;
+        free(w);
     }
     return 1;
 }
-
 bool isBipartite(int** graph, int graphSize, int* graphColSize) {
-    int *visited = (int *) malloc(graphSize * sizeof(int));
-    for (int i=0; i < graphSize; i++) visited[i] = 0;
+    vNo *visited = (vNo *) malloc(graphSize * sizeof(vNo));
+    for (int i=0; i < graphSize; i++){
+        visited[i].v = 0;
+        visited[i].camada = -1;
+    }
     No *fila = cria_fila();
     int result = bfs(graph, graphSize, fila, visited, 0);
     free(fila);
     free(visited);
-    return result;
+    return result == 1 ? true : false;
 }
