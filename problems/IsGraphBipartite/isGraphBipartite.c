@@ -6,10 +6,12 @@ typedef struct no {
     int dado;
     struct no *prox;
 } no;
-typedef struct {
-    int visitado;
-    int camada;
-} vNo;
+typedef enum cor {
+    UNVISITED = 0,
+    BLUE = 1,
+    RED = 2,
+} cor;
+
 no *cria_fila(){
     no *fila = (no *) malloc(sizeof(no));
     if (fila != NULL){
@@ -41,46 +43,40 @@ int desenfileira(no *fila){
 int fila_vazia(no *fila){
     return (fila->prox == NULL);
 }
-int bfs(int **graph, int graphSize, int *graphColSize, no *fila, vNo *visited, int v){
-    int camada = 0;
-    visited[v].visitado = 1;
-    visited[v].camada = camada;
+int bfs(int **graph, int graphSize, int *graphColSize, no *fila, cor *cores, int v){
+    cores[v] = BLUE;
     enfileira(fila, v);
     while(!fila_vazia(fila)){
         v = desenfileira(fila);
-        camada++;
-        int vCamada = visited[v].camada;
         for (int i=0; i < graphColSize[v]; i++){
             int vizinho = graph[v][i];
-            if (visited[vizinho].visitado == 0){
-                visited[vizinho].visitado = 1;
-                visited[vizinho].camada = camada;
+            if (cores[vizinho] == UNVISITED){
+                cores[vizinho] = (cores[v] == BLUE) ? RED : BLUE;
                 enfileira(fila, vizinho);
             }
-            else if (visited[vizinho].visitado == 1){
-                if (vCamada == visited[vizinho].camada) return 0;
+            if (cores[v] == cores[vizinho]){
+                    return 0;
             }
         }
     }
     return 1;
 }
 bool isBipartite(int** graph, int graphSize, int* graphColSize) {
-    vNo *visited = (vNo *) malloc(graphSize * sizeof(vNo));
+    cor *cores = (cor *) malloc(graphSize * sizeof(cor));
     for (int i=0; i < graphSize; i++){
-        visited[i].visitado = 0;
-        visited[i].camada = -1;
+        cores[i] = UNVISITED;
     }
     no *fila = cria_fila();
     for (int i=0; i<graphSize; i++){
-        if (!visited[i].visitado){
-            if (!bfs(graph, graphSize, graphColSize, fila, visited, i)){
+        if (cores[i] == UNVISITED){
+            if (!bfs(graph, graphSize, graphColSize, fila, cores, i)){
                 free(fila);
-                free(visited);
+                free(cores);
                 return false;
             }
         }
     }
     free(fila);
-    free(visited);
+    free(cores);
     return true;
 }
