@@ -22,9 +22,9 @@ RUN wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidge
 
 WORKDIR /app
 
-COPY /map/main.cpp .
+COPY /map/. .
 
-RUN g++ main.cpp -o main $(wx-config --cxxflags --libs)
+RUN g++ main.cpp graph.cpp -o main $(wx-config --cxxflags --libs)
 
 CMD ["./main"]
 

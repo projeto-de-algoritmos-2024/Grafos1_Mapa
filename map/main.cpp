@@ -1,3 +1,4 @@
+#include "graph.h"
 #include <vector>
 #include <wx/wx.h>
 #include <cmath>
@@ -6,38 +7,16 @@
 
 using namespace std;
 
-void addEdge(vector<int> adj[], int u, int v)
-{
-    // Verificação de limites
-    if (u < 6 && v < 6 && u >= 0 && v >= 0)
-    {
-        adj[u].push_back(v);
-        adj[v].push_back(u);
-    }
-}
-
 class GraphPanel : public wxPanel
 {
 public:
-    GraphPanel(wxWindow *parent, vector<int> adj[], int n) : wxPanel(parent), n(n), node_colors(n, *wxBLUE), node_positions(n)
+    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxBLUE), node_positions(n)
     {
-        // Cria uma cópia do vetor de adjacência
-        this->adj = new vector<int>[n];
-        for (int i = 0; i < n; i++)
-        {
-            this->adj[i] = adj[i]; // Cópia dos dados
-        }
-
         Bind(wxEVT_PAINT, &GraphPanel::OnPaint, this);
         Bind(wxEVT_LEFT_DOWN, &GraphPanel::OnClick, this);
         Bind(wxEVT_SIZE, &GraphPanel::OnResize, this);
     }
-
-    ~GraphPanel()
-    {
-        delete[] adj; // Libera a memória
-    }
-
+    
     void RecalculateNodePositions()
     {
         InitializeNodePositions();
@@ -45,7 +24,7 @@ public:
     }
 
 private:
-    vector<int> *adj;
+    Graph *graph;
     int n;
     vector<wxColor> node_colors;
     vector<wxPoint> node_positions;
@@ -53,23 +32,23 @@ private:
     int panel_width, panel_height;
 
     void InitializeNodePositions()
-{
-    int grid_size = ceil(sqrt(n)); // Define o tamanho da grade baseado na raiz quadrada do número de nós
-    int padding = 50; // Espaçamento entre os nós e as bordas do painel
-    int cell_width = (panel_width - 2 * padding) / grid_size;
-    int cell_height = (panel_height - 2 * padding) / grid_size;
-
-    for (int i = 0; i < n; i++)
     {
-        int row = i / grid_size;
-        int col = i % grid_size;
+        int grid_size = ceil(sqrt(n)); // Define o tamanho da grade baseado na raiz quadrada do número de nós
+        int padding = 50;              // Espaçamento entre os nós e as bordas do painel
+        int cell_width = (panel_width - 2 * padding) / grid_size;
+        int cell_height = (panel_height - 2 * padding) / grid_size;
 
-        int x = padding + col * cell_width + cell_width / 2;
-        int y = padding + row * cell_height + cell_height / 2;
+        for (int i = 0; i < n; i++)
+        {
+            int row = i / grid_size;
+            int col = i % grid_size;
 
-        node_positions[i] = wxPoint(x, y);
+            int x = padding + col * cell_width + cell_width / 2;
+            int y = padding + row * cell_height + cell_height / 2;
+
+            node_positions[i] = wxPoint(x, y);
+        }
     }
-}
 
     void OnPaint(wxPaintEvent &event)
     {
@@ -79,7 +58,7 @@ private:
         dc.SetPen(wxPen(*wxBLACK, 2));
         for (int i = 0; i < n; i++)
         {
-            for (int neighbor : adj[i])
+            for (int neighbor : graph->getAdjList(i))
             {
                 dc.DrawLine(node_positions[i], node_positions[neighbor]);
             }
@@ -157,11 +136,11 @@ private:
 class GraphFrame : public wxFrame
 {
 public:
-    GraphFrame(const wxString &title, vector<int> adj[], int n)
+    GraphFrame(const wxString &title, Graph *graph)
         : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(800, 800))
     {
         wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-        panel = new GraphPanel(this, adj, n);
+        panel = new GraphPanel(this, graph);
         sizer->Add(panel, 1, wxEXPAND);
 
         wxButton *button = new wxButton(this, wxID_ANY, "Refresh");
@@ -173,6 +152,7 @@ public:
     }
 
 private:
+    Graph *graph;
     GraphPanel *panel;
 
     void OnRefresh(wxCommandEvent &event)
@@ -186,14 +166,14 @@ class MyApp : public wxApp
 public:
     virtual bool OnInit()
     {
-        vector<int> adj[6];
-        addEdge(adj, 0, 1);
-        addEdge(adj, 0, 2);
-        addEdge(adj, 1, 3);
-        addEdge(adj, 1, 4);
-        addEdge(adj, 2, 5);
+        Graph *g = new Graph(6);
+        g->addEdge(0, 1);
+        g->addEdge(0, 2);
+        g->addEdge(1, 3);
+        g->addEdge(1, 4);
+        g->addEdge(2, 5);
 
-        GraphFrame *frame = new GraphFrame("Graph Visualization", adj, 6);
+        GraphFrame *frame = new GraphFrame("Graph Visualization", g);
         frame->Show(true);
 
         return true;
