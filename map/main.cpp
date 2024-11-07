@@ -235,7 +235,8 @@ private:
     GraphPanel *panel;
 
     void OnRefresh(wxCommandEvent &event)
-    {
+    {   
+        // Seg fault aqui
         if (!graph)
         {
             cout << "Graph não foi inicializado!" << endl;
