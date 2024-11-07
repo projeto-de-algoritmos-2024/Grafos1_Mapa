@@ -4,6 +4,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <map>
 
 using namespace std;
 
@@ -24,10 +25,9 @@ public:
         Bind(wxEVT_SIZE, &GraphPanel::OnResize, this);
     }
 
-    void RecalculateNodePositions()
+    void RecalculateNodePositions(vector<int> topological_order)
     {
-        InitializeNodePositions();
-        Refresh();
+        cout << "Topological order" << topological_order.size() << endl;
     }
 
 private:
@@ -100,7 +100,7 @@ private:
         for (int i = 0; i < n; i++)
         {
             dc.SetPen(wxPen(edge_colors[i], 2));
-            for (int neighbor : graph->getAdjList(i))
+            for (int neighbor : graph->getAdjListFromNode(i))
             {
                 // Posições dos vértices
                 wxPoint start = node_positions[i];
@@ -126,7 +126,7 @@ private:
                 wxPoint mid2(end.x, (start.y + end.y) / 2);
 
                 // Desenha a polilinha
-                wxPoint points[4] = { start, mid1, mid2, end };
+                wxPoint points[4] = {start, mid1, mid2, end};
                 dc.DrawLines(4, points);
 
                 double angle = atan2(end.y - mid2.y, end.x - mid2.x);
@@ -134,7 +134,6 @@ private:
                 wxPoint adjustedEnd = end;
                 adjustedEnd.x -= (rectWidth / 2) * cos(angle);
                 adjustedEnd.y -= (rectHeight / 2) * sin(angle);
-                
 
                 // Desenha a ponta da seta
                 wxPoint arrow_left(
@@ -237,7 +236,22 @@ private:
 
     void OnRefresh(wxCommandEvent &event)
     {
-        panel->RecalculateNodePositions();
+        if (!graph)
+        {
+            cout << "Graph não foi inicializado!" << endl;
+            return;
+        }
+
+        if (graph->getSize() <= 0)
+        {
+            cout << "Graph vazio!" << endl;
+            return;
+        }
+
+        const vector<vector<int>> &adjl = graph->getAdjList();
+        vector<int> topological_order = graph->topologicalSort(graph->getSize(), adjl);
+
+        panel->RecalculateNodePositions(topological_order);
     }
 };
 

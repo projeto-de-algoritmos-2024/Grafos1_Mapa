@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <iostream>
 
 Graph::Graph(int n) : n(n), adj(n)
 {
@@ -15,10 +16,16 @@ void Graph::addEdge(int u, int v)
     }
 }
 
-const std::vector<int> &Graph::getAdjList(int node) const
+const std::vector<int> &Graph::getAdjListFromNode(int node) const
 {
     return adj[node];
 }
+
+const std::vector<std::vector<int>> &Graph::getAdjList() const
+{
+    return adj;
+}
+
 
 int Graph::getSize() const
 {
@@ -36,8 +43,13 @@ void Graph::dfs(int node, std::vector<bool> &visited, std::vector<int> &ans, con
     ans.push_back(node);
 }
 
-std::vector<int> Graph::topologicalSort(int n, std::vector<std::vector<int>> &adj) const
+std::vector<int> Graph::topologicalSort(int n, const std::vector<std::vector<int>> &adj) const
 {
+    if (!adj.size()) {
+        std::cerr << "Adjacency list is empty!" << std::endl;
+        return {};
+    }
+    
     std::vector<bool> visited(n, false);
     std::vector<int> ans;
 
