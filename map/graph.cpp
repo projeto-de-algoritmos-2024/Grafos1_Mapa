@@ -75,4 +75,6 @@ std::vector<int> Graph::kahn(int n, std::vector<std::vector<int>> &adj) const
         }
     }
 
+    return ans;
+
 }   

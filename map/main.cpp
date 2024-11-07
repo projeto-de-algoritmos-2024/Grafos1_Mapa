@@ -194,7 +194,7 @@ public:
         panel = new GraphPanel(this, graph);
         sizer->Add(panel, 1, wxEXPAND);
 
-        wxButton *button = new wxButton(this, wxID_ANY, "Refresh");
+        wxButton *button = new wxButton(this, wxID_ANY, "Calculate Topological Order");
         sizer->Add(button, 0, wxALIGN_LEFT | wxALL, 10);
 
         SetSizer(sizer);
