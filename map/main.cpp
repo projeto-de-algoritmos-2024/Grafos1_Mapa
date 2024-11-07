@@ -10,13 +10,13 @@ using namespace std;
 class GraphPanel : public wxPanel
 {
 public:
-    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxBLUE), node_positions(n)
+    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxWHITE), node_positions(n)
     {
         Bind(wxEVT_PAINT, &GraphPanel::OnPaint, this);
         Bind(wxEVT_LEFT_DOWN, &GraphPanel::OnClick, this);
         Bind(wxEVT_SIZE, &GraphPanel::OnResize, this);
     }
-    
+
     void RecalculateNodePositions()
     {
         InitializeNodePositions();
@@ -32,35 +32,35 @@ private:
     int panel_width, panel_height;
     // vector<string> disciplines = {"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng", "Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS", "MN", "Eng Econ", "HC", "TED", "PED", "OO", "MD1", "GPeQ", "MDS", "EDA1", "FAC", "MD2", "PI1", "IHC", "Requisitos", "SBD1", "FSO", "Compiladores", "EDA2", "QSW", "TSW", "Arq e Des", "Redes", "SBD2", "PA", "TPPE", "Paradigmas", "FSE", "PSPD", "EPS", "GCES", "Estagio", "TCC1", "PI2", "TCC2"};
     vector<vector<string>> disciplines = {
-    {"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng"},
-    {"Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS"},
-    {"MN", "Eng Econ", "HC", "TED", "PED", "OO", "MD1"},
-    {"GPeQ", "MDS", "EDA1", "FAC", "MD2", "PI1"},
-    {"IHC", "Requisitos", "SBD1", "FSO", "Compiladores", "EDA2"},
-    {"QSW", "TSW", "Arq e Des", "Redes", "SBD2", "PA"},
-    {"TPPE", "Paradigmas", "FSE", "PSPD"},
-    {"EPS", "GCES", "Estagio"}, 
-    {"TCC1", "PI2"},
-    {"TCC2"}
-};
+        {"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng"},
+        {"Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS"},
+        {"MN", "Eng Econ", "HC", "TED", "PED", "OO", "MD1"},
+        {"GPeQ", "MDS", "EDA1", "FAC", "MD2", "PI1"},
+        {"IHC", "Requisitos", "SBD1", "FSO", "Compiladores", "EDA2"},
+        {"QSW", "TSW", "Arq e Des", "Redes", "SBD2", "PA"},
+        {"TPPE", "Paradigmas", "FSE", "PSPD"},
+        {"EPS", "GCES", "Estagio"},
+        {"TCC1", "PI2"},
+        {"TCC2"}};
 
     void InitializeNodePositions()
     {
-        int padding = 50;              // Espaçamento entre as bordas do painel e os nós
-        int layer_spacing = 150;       // Espaço horizontal entre cada camada (semestre)
-        int node_spacing = 80;         // Espaço vertical entre cada nó na camada
+        int padding = 50;        // Espaçamento entre as bordas do painel e os nós
+        int layer_spacing = 150; // Espaço horizontal entre cada camada (semestre)
+        int node_spacing = 80;   // Espaço vertical entre cada nó na camada
 
-        int x_position = padding;      // Inicia a primeira camada na borda esquerda do painel
+        int x_position = padding; // Inicia a primeira camada na borda esquerda do painel
 
         for (int semester = 0; semester < disciplines.size(); semester++)
         {
-            int y_position = padding;  // Inicia a camada no topo do painel
+            int y_position = padding; // Inicia a camada no topo do painel
 
             // Para cada disciplina no semestre atual, define a posição do nó
             for (int node_index = 0; node_index < disciplines[semester].size(); node_index++)
             {
                 int index = 0;
-                for (int i = 0; i < semester; i++) {
+                for (int i = 0; i < semester; i++)
+                {
                     index += disciplines[i].size();
                 }
                 index += node_index;
@@ -81,59 +81,96 @@ private:
     {
         wxPaintDC dc(this);
 
-        // Desenha as arestas 
+        const double arrow_size = 10.0;
+        const double arrow_angle = M_PI / 6; // 30 graus
+
+        const int rectWidth = 90;
+        const int rectHeight = 40;
+
+        // Desenha as arestas
         dc.SetPen(wxPen(*wxBLACK, 2));
+
         for (int i = 0; i < n; i++)
         {
             for (int neighbor : graph->getAdjList(i))
             {
-                dc.DrawLine(node_positions[i], node_positions[neighbor]);
+                // Posições dos vértices
+                wxPoint start = node_positions[i];
+                wxPoint end = node_positions[neighbor];
+
+
+                double angle = atan2(end.y - start.y, end.x - start.x);
+
+                wxPoint adjustedEnd = end;
+                adjustedEnd.x -= (rectWidth / 2) * cos(angle);
+                adjustedEnd.y -= (rectHeight / 2) * sin(angle);
+                
+                // Desenha a linha principal
+                dc.DrawLine(start, adjustedEnd);
+
+                // Desenha a ponta da seta
+                wxPoint arrow_left(
+                    adjustedEnd.x - arrow_size * cos(angle - arrow_angle),
+                    adjustedEnd.y - arrow_size * sin(angle - arrow_angle));
+                wxPoint arrow_right(
+                    adjustedEnd.x - arrow_size * cos(angle + arrow_angle),
+                    adjustedEnd.y - arrow_size * sin(angle + arrow_angle));
+
+                dc.DrawLine(adjustedEnd, arrow_left);
+                dc.DrawLine(adjustedEnd, arrow_right);
             }
         }
 
         // Desenha os nós
         int node_index = 0;
-        for (const auto& semester : disciplines)
+        for (const auto &semester : disciplines)
         {
-            for (const auto& discipline : semester)
+            for (const auto &discipline : semester)
             {
                 dc.SetBrush(wxBrush(node_colors[node_index]));
-                dc.DrawRectangle(node_positions[node_index].x - 10, node_positions[node_index].y - 20, 90, 40);
-                dc.DrawText(wxString::Format("%s", discipline), node_positions[node_index].x - 8, node_positions[node_index].y - 8);
+
+                dc.DrawRectangle(node_positions[node_index].x - rectWidth / 2,
+                                 node_positions[node_index].y - rectHeight / 2,
+                                 rectWidth, rectHeight);
+
+                dc.DrawText(wxString::Format("%s", discipline),
+                            node_positions[node_index].x - rectWidth / 2 + 2,
+                            node_positions[node_index].y - rectHeight / 2 + 2);
+
                 node_index++;
             }
         }
     }
 
     void OnClick(wxMouseEvent &event)
-{
-    wxPoint click_pos = event.GetPosition();
-    int rect_width = 90;
-    int rect_height = 40;
-
-    for (int i = 0; i < n; i++)
     {
-        // Verifica se o clique está dentro do retângulo do nó
-        if (click_pos.x >= node_positions[i].x - 10 && click_pos.x <= node_positions[i].x - 10 + rect_width &&
-            click_pos.y >= node_positions[i].y - 20 && click_pos.y <= node_positions[i].y - 20 + rect_height)
+        wxPoint click_pos = event.GetPosition();
+        int rect_width = 90;
+        int rect_height = 40;
+
+        for (int i = 0; i < n; i++)
         {
-            if (find(selected_nodes.begin(), selected_nodes.end(), i) == selected_nodes.end())
+            // Verifica se o clique está dentro do retângulo do nó
+            if (click_pos.x >= node_positions[i].x - 10 && click_pos.x <= node_positions[i].x - 10 + rect_width &&
+                click_pos.y >= node_positions[i].y - 20 && click_pos.y <= node_positions[i].y - 20 + rect_height)
             {
-                // Seleciona o nó, marca como vermelho e adiciona à lista de nós selecionados
-                selected_nodes.push_back(i);
-                node_colors[i] = *wxRED;
+                if (find(selected_nodes.begin(), selected_nodes.end(), i) == selected_nodes.end())
+                {
+                    // Seleciona o nó, marca como vermelho e adiciona à lista de nós selecionados
+                    selected_nodes.push_back(i);
+                    node_colors[i] = *wxRED;
+                }
+                else
+                {
+                    // Deseleciona o nó, marca como azul e remove da lista de nós selecionados
+                    node_colors[i] = *wxWHITE;
+                    selected_nodes.erase(remove(selected_nodes.begin(), selected_nodes.end(), i), selected_nodes.end());
+                }
+                Refresh();
+                break;
             }
-            else
-            {
-                // Deseleciona o nó, marca como azul e remove da lista de nós selecionados
-                node_colors[i] = *wxBLUE;
-                selected_nodes.erase(remove(selected_nodes.begin(), selected_nodes.end(), i), selected_nodes.end());
-            }
-            Refresh();
-            break;
         }
     }
-}
 
     void OnResize(wxSizeEvent &event)
     {
@@ -195,7 +232,7 @@ public:
 
         g->addEdge(12, 18);
         g->addEdge(14, 15);
-        g->addEdge(14, 15);
+        g->addEdge(15, 14);
         g->addEdge(14, 21);
         g->addEdge(16, 19);
         g->addEdge(16, 35);
@@ -211,7 +248,7 @@ public:
         g->addEdge(21, 27);
         g->addEdge(22, 26);
         g->addEdge(23, 44);
-        
+
         g->addEdge(24, 30);
         g->addEdge(25, 32);
         g->addEdge(26, 34);
