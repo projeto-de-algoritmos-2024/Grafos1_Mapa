@@ -10,7 +10,7 @@ using namespace std;
 class GraphPanel : public wxPanel
 {
 public:
-    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxWHITE), node_positions(n)
+    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxWHITE), edge_colors(n), node_positions(n)
     {
         // Inicializa as cores das arestas com cores diferentes
         srand(time(0)); // Inicializa a semente do gerador de números aleatórios
@@ -106,15 +106,35 @@ private:
                 wxPoint start = node_positions[i];
                 wxPoint end = node_positions[neighbor];
 
+                // Adiciona um pequeno desvio para evitar sobreposição de linhas retas
+                // int offset = (rand() % 21) - 10; // Gera um valor entre -10 e 10
+                // if (start.x == end.x) // Linha vertical
+                // {
+                //     start.x += offset;
+                //     end.x += offset;
+                // }
+                // else if (start.y == end.y) // Linha horizontal
+                // {
+                //     start.y += offset;
+                //     end.y += offset;
+                // }
 
-                double angle = atan2(end.y - start.y, end.x - start.x);
+                // Calcula um ponto intermediário para desviar dos nós
+                // wxPoint mid1((start.x + end.x) / 2, start.y);
+                // wxPoint mid2((start.x + end.x) / 2, end.y);
+                wxPoint mid1(start.x, (start.y + end.y) / 2);
+                wxPoint mid2(end.x, (start.y + end.y) / 2);
+
+                // Desenha a polilinha
+                wxPoint points[4] = { start, mid1, mid2, end };
+                dc.DrawLines(4, points);
+
+                double angle = atan2(end.y - mid2.y, end.x - mid2.x);
 
                 wxPoint adjustedEnd = end;
                 adjustedEnd.x -= (rectWidth / 2) * cos(angle);
                 adjustedEnd.y -= (rectHeight / 2) * sin(angle);
                 
-                // Desenha a linha principal
-                dc.DrawLine(start, adjustedEnd);
 
                 // Desenha a ponta da seta
                 wxPoint arrow_left(
