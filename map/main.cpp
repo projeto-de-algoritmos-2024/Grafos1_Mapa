@@ -10,8 +10,15 @@ using namespace std;
 class GraphPanel : public wxPanel
 {
 public:
-    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxBLUE), node_positions(n)
+    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxBLUE), edge_colors(n), node_positions(n)
     {
+        // Inicializa as cores das arestas com cores diferentes
+        srand(time(0)); // Inicializa a semente do gerador de números aleatórios
+        for (int i = 0; i < n; i++)
+        {
+            edge_colors[i] = wxColour(rand() % 256, rand() % 256, rand() % 256);
+        }
+
         Bind(wxEVT_PAINT, &GraphPanel::OnPaint, this);
         Bind(wxEVT_LEFT_DOWN, &GraphPanel::OnClick, this);
         Bind(wxEVT_SIZE, &GraphPanel::OnResize, this);
@@ -27,10 +34,10 @@ private:
     Graph *graph;
     int n;
     vector<wxColor> node_colors;
+    vector<wxColor> edge_colors;
     vector<wxPoint> node_positions;
     vector<int> selected_nodes;
     int panel_width, panel_height;
-    // vector<string> disciplines = {"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng", "Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS", "MN", "Eng Econ", "HC", "TED", "PED", "OO", "MD1", "GPeQ", "MDS", "EDA1", "FAC", "MD2", "PI1", "IHC", "Requisitos", "SBD1", "FSO", "Compiladores", "EDA2", "QSW", "TSW", "Arq e Des", "Redes", "SBD2", "PA", "TPPE", "Paradigmas", "FSE", "PSPD", "EPS", "GCES", "Estagio", "TCC1", "PI2", "TCC2"};
     vector<vector<string>> disciplines = {
     {"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng"},
     {"Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS"},
@@ -81,10 +88,10 @@ private:
     {
         wxPaintDC dc(this);
 
-        // Desenha as arestas 
-        dc.SetPen(wxPen(*wxBLACK, 2));
+        // Desenha as arestas com cores diferentes
         for (int i = 0; i < n; i++)
         {
+            dc.SetPen(wxPen(edge_colors[i], 2));
             for (int neighbor : graph->getAdjList(i))
             {
                 dc.DrawLine(node_positions[i], node_positions[neighbor]);
@@ -92,6 +99,7 @@ private:
         }
 
         // Desenha os nós
+        dc.SetPen(wxPen(*wxBLACK, 2));
         int node_index = 0;
         for (const auto& semester : disciplines)
         {
