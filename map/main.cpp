@@ -30,23 +30,50 @@ private:
     vector<wxPoint> node_positions;
     vector<int> selected_nodes;
     int panel_width, panel_height;
+    // vector<string> disciplines = {"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng", "Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS", "MN", "Eng Econ", "HC", "TED", "PED", "OO", "MD1", "GPeQ", "MDS", "EDA1", "FAC", "MD2", "PI1", "IHC", "Requisitos", "SBD1", "FSO", "Compiladores", "EDA2", "QSW", "TSW", "Arq e Des", "Redes", "SBD2", "PA", "TPPE", "Paradigmas", "FSE", "PSPD", "EPS", "GCES", "Estagio", "TCC1", "PI2", "TCC2"};
+    vector<vector<string>> disciplines = {
+    {"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng"},
+    {"Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS"},
+    {"MN", "Eng Econ", "HC", "TED", "PED", "OO", "MD1"},
+    {"GPeQ", "MDS", "EDA1", "FAC", "MD2", "PI1"},
+    {"IHC", "Requisitos", "SBD1", "FSO", "Compiladores", "EDA2"},
+    {"QSW", "TSW", "Arq e Des", "Redes", "SBD2", "PA"},
+    {"TPPE", "Paradigmas", "FSE", "PSPD"},
+    {"EPS", "GCES", "Estagio"}, 
+    {"TCC1", "PI2"},
+    {"TCC2"}
+};
 
     void InitializeNodePositions()
     {
-        int grid_size = ceil(sqrt(n)); // Define o tamanho da grade baseado na raiz quadrada do número de nós
-        int padding = 50;              // Espaçamento entre os nós e as bordas do painel
-        int cell_width = (panel_width - 2 * padding) / grid_size;
-        int cell_height = (panel_height - 2 * padding) / grid_size;
+        int padding = 50;              // Espaçamento entre as bordas do painel e os nós
+        int layer_spacing = 150;       // Espaço horizontal entre cada camada (semestre)
+        int node_spacing = 80;         // Espaço vertical entre cada nó na camada
 
-        for (int i = 0; i < n; i++)
+        int x_position = padding;      // Inicia a primeira camada na borda esquerda do painel
+
+        for (int semester = 0; semester < disciplines.size(); semester++)
         {
-            int row = i / grid_size;
-            int col = i % grid_size;
+            int y_position = padding;  // Inicia a camada no topo do painel
 
-            int x = padding + col * cell_width + cell_width / 2;
-            int y = padding + row * cell_height + cell_height / 2;
+            // Para cada disciplina no semestre atual, define a posição do nó
+            for (int node_index = 0; node_index < disciplines[semester].size(); node_index++)
+            {
+                int index = 0;
+                for (int i = 0; i < semester; i++) {
+                    index += disciplines[i].size();
+                }
+                index += node_index;
 
-            node_positions[i] = wxPoint(x, y);
+                // Define a posição x e y do nó atual
+                node_positions[index] = wxPoint(x_position, y_position);
+
+                // Move y para a próxima posição na mesma camada
+                y_position += node_spacing;
+            }
+
+            // Move x para a próxima camada
+            x_position += layer_spacing;
         }
     }
 
@@ -54,7 +81,7 @@ private:
     {
         wxPaintDC dc(this);
 
-        // Desenha as arestas
+        // Desenha as arestas 
         dc.SetPen(wxPen(*wxBLACK, 2));
         for (int i = 0; i < n; i++)
         {
@@ -65,61 +92,48 @@ private:
         }
 
         // Desenha os nós
-        for (int i = 0; i < n; i++)
+        int node_index = 0;
+        for (const auto& semester : disciplines)
         {
-            dc.SetBrush(wxBrush(node_colors[i]));
-            dc.DrawCircle(node_positions[i], 16);
-            dc.DrawText(wxString::Format("%d", i), node_positions[i].x - 8, node_positions[i].y - 8);
-
-            // Se o nó é o "Start Point" ou "End Point", exibe o rótulo
-            if (selected_nodes.size() > 0 && i == selected_nodes[0])
+            for (const auto& discipline : semester)
             {
-                dc.DrawText("Start Point", node_positions[i].x - 30, node_positions[i].y - 30);
-            }
-            if (selected_nodes.size() > 1 && i == selected_nodes[1])
-            {
-                dc.DrawText("End Point", node_positions[i].x - 30, node_positions[i].y + 25);
+                dc.SetBrush(wxBrush(node_colors[node_index]));
+                dc.DrawRectangle(node_positions[node_index].x - 10, node_positions[node_index].y - 20, 90, 40);
+                dc.DrawText(wxString::Format("%s", discipline), node_positions[node_index].x - 8, node_positions[node_index].y - 8);
+                node_index++;
             }
         }
     }
 
     void OnClick(wxMouseEvent &event)
-    {
-        wxPoint click_pos = event.GetPosition();
-        int node_radius = 16;
+{
+    wxPoint click_pos = event.GetPosition();
+    int rect_width = 90;
+    int rect_height = 40;
 
-        for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
+    {
+        // Verifica se o clique está dentro do retângulo do nó
+        if (click_pos.x >= node_positions[i].x - 10 && click_pos.x <= node_positions[i].x - 10 + rect_width &&
+            click_pos.y >= node_positions[i].y - 20 && click_pos.y <= node_positions[i].y - 20 + rect_height)
         {
-            // Verifica se o clique está dentro do raio do nó
-            if (click_pos.x >= node_positions[i].x - node_radius && click_pos.x <= node_positions[i].x + node_radius &&
-                click_pos.y >= node_positions[i].y - node_radius && click_pos.y <= node_positions[i].y + node_radius)
+            if (find(selected_nodes.begin(), selected_nodes.end(), i) == selected_nodes.end())
             {
-                if (find(selected_nodes.begin(), selected_nodes.end(), i) == selected_nodes.end())
-                {
-                    if (selected_nodes.size() < 2)
-                    {
-                        selected_nodes.push_back(i);
-                        node_colors[i] = *wxRED;
-                    }
-                    else
-                    {
-                        int first_selected = selected_nodes.front();
-                        node_colors[first_selected] = *wxBLUE;
-                        selected_nodes.erase(selected_nodes.begin());
-                        selected_nodes.push_back(i);
-                        node_colors[i] = *wxRED;
-                    }
-                }
-                else
-                {
-                    node_colors[i] = *wxBLUE;
-                    selected_nodes.erase(remove(selected_nodes.begin(), selected_nodes.end(), i), selected_nodes.end());
-                }
-                Refresh();
-                break;
+                // Seleciona o nó, marca como vermelho e adiciona à lista de nós selecionados
+                selected_nodes.push_back(i);
+                node_colors[i] = *wxRED;
             }
+            else
+            {
+                // Deseleciona o nó, marca como azul e remove da lista de nós selecionados
+                node_colors[i] = *wxBLUE;
+                selected_nodes.erase(remove(selected_nodes.begin(), selected_nodes.end(), i), selected_nodes.end());
+            }
+            Refresh();
+            break;
         }
     }
+}
 
     void OnResize(wxSizeEvent &event)
     {
@@ -137,7 +151,7 @@ class GraphFrame : public wxFrame
 {
 public:
     GraphFrame(const wxString &title, Graph *graph)
-        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(800, 800))
+        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(1500, 700))
     {
         wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
         panel = new GraphPanel(this, graph);
@@ -166,12 +180,56 @@ class MyApp : public wxApp
 public:
     virtual bool OnInit()
     {
-        Graph *g = new Graph(6);
-        g->addEdge(0, 1);
-        g->addEdge(0, 2);
-        g->addEdge(1, 3);
-        g->addEdge(1, 4);
-        g->addEdge(2, 5);
+        Graph *g = new Graph(46);
+        g->addEdge(0, 5);
+        g->addEdge(0, 9);
+        g->addEdge(0, 35);
+        g->addEdge(1, 10);
+        g->addEdge(1, 16);
+        g->addEdge(1, 20);
+        g->addEdge(2, 24);
+
+        g->addEdge(5, 11);
+        g->addEdge(8, 14);
+        g->addEdge(8, 15);
+
+        g->addEdge(12, 18);
+        g->addEdge(14, 15);
+        g->addEdge(14, 15);
+        g->addEdge(14, 21);
+        g->addEdge(16, 19);
+        g->addEdge(16, 35);
+        g->addEdge(16, 23);
+        g->addEdge(17, 22);
+
+        g->addEdge(18, 30);
+        g->addEdge(19, 25);
+        g->addEdge(19, 31);
+        g->addEdge(20, 28);
+        g->addEdge(20, 29);
+        g->addEdge(20, 35);
+        g->addEdge(21, 27);
+        g->addEdge(22, 26);
+        g->addEdge(23, 44);
+        
+        g->addEdge(24, 30);
+        g->addEdge(25, 32);
+        g->addEdge(26, 34);
+        g->addEdge(27, 33);
+        g->addEdge(27, 38);
+        g->addEdge(28, 37);
+        g->addEdge(29, 39);
+
+        g->addEdge(31, 36);
+        g->addEdge(31, 41);
+        g->addEdge(32, 37);
+        g->addEdge(33, 39);
+
+        g->addEdge(36, 40);
+
+        g->addEdge(40, 44);
+
+        g->addEdge(43, 45);
 
         GraphFrame *frame = new GraphFrame("Graph Visualization", g);
         frame->Show(true);
