@@ -2,3 +2,4 @@ main
 .vscode
 *.json
 output/ 
+.env
