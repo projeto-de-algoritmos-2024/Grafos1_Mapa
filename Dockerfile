@@ -24,7 +24,8 @@ WORKDIR /app
 
 COPY /map/. .
 
-RUN g++ main.cpp graph.cpp -o main $(wx-config --cxxflags --libs)
+# RUN g++ main.cpp graph.cpp -o main $(wx-config --cxxflags --libs)
 
-CMD ["./main"]
+# CMD ["./main"]
 
+CMD g++ main.cpp graph.cpp -o main $(wx-config --cxxflags --libs) && ./main
