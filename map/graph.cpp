@@ -9,7 +9,6 @@ void Graph::addEdge(int u, int v)
     if (u < n && v < n && u >= 0 && v >= 0)
     {
         adj[u].push_back(v);
-        adj[v].push_back(u);
     }
 }
 
