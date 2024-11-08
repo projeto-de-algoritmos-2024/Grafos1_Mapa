@@ -9,13 +9,28 @@ public:
     explicit Graph(int n);
     ~Graph();
 
+    Graph(const std::vector<std::vector<int>> &adj);
+
+
     void addEdge(int u, int v);
-    const std::vector<int>& getAdjListFromNode(int node) const;
-    const std::vector<std::vector<int>>& getAdjList() const;
+
+    const std::vector<int> &getAdjListFromNode(int node) const;
+
+    const std::vector<std::vector<int>> &getAdjList() const;
+
     int getSize() const;
-    void dfs(int node, std::vector<bool> &visited, std::vector<int> &ans, const std::vector<std::vector<int>>& adj) const;
-    std::vector<int> topologicalSort(int n, const std::vector<std::vector<int>> &adj) const; //DFS based
+
+    void dfs(int node, std::vector<bool> &visited, std::vector<int> &ans) const;
+
+    std::vector<int> topologicalSort() const; // DFS based
+
     std::vector<int> kahn(int n, std::vector<std::vector<int>> &adj) const; // BFS based
+
+    void printGraph(std::vector<std::vector<int>> &adj) const;
+
+    void printTopologicalSort(std::vector<int> &top_order) const;
+
+    Graph removeNodes(std::vector<int> selected_nodes) const;
 
 private:
     std::vector<std::vector<int>> adj;

@@ -25,9 +25,26 @@ public:
         Bind(wxEVT_SIZE, &GraphPanel::OnResize, this);
     }
 
-    void RecalculateNodePositions(vector<int> topological_order)
+    void TopologicalSort()
     {
-        cout << "Topological order" << topological_order.size() << endl;
+        Graph tg = graph->removeNodes(selected_nodes);
+        vector<int> top_order = tg.topologicalSort();
+
+        for (int node : top_order)
+        {
+            std::cout << node << " ";
+        }
+
+        //graph->printGraph(modified_adj);
+
+
+        if (top_order.empty())
+        {
+            cout << "Graph has a cycle!" << endl;
+            return;
+        }
+
+        tg.printTopologicalSort(top_order); 
     }
 
 private:
@@ -161,7 +178,7 @@ private:
                                  node_positions[node_index].y - rectHeight / 2,
                                  rectWidth, rectHeight);
 
-                dc.DrawText(wxString::Format("%s", discipline),
+                dc.DrawText(wxString::Format("%s %d", discipline, node_index),
                             node_positions[node_index].x - rectWidth / 2 + 2,
                             node_positions[node_index].y - rectHeight / 2 + 2);
 
@@ -227,32 +244,24 @@ public:
 
         SetSizer(sizer);
 
-        button->Bind(wxEVT_BUTTON, &GraphFrame::OnRefresh, this);
+        button->Bind(wxEVT_BUTTON, &GraphFrame::OnCalculate, this);
+
+        // graph->printGraph();
     }
 
 private:
     Graph *graph;
     GraphPanel *panel;
 
-    void OnRefresh(wxCommandEvent &event)
-    {   
-        // Seg fault aqui
+    void OnCalculate(wxCommandEvent &event)
+    {
         if (!graph)
         {
             cout << "Graph não foi inicializado!" << endl;
             return;
         }
 
-        if (graph->getSize() <= 0)
-        {
-            cout << "Graph vazio!" << endl;
-            return;
-        }
-
-        const vector<vector<int>> &adjl = graph->getAdjList();
-        vector<int> topological_order = graph->topologicalSort(graph->getSize(), adjl);
-
-        panel->RecalculateNodePositions(topological_order);
+        panel->TopologicalSort();
     }
 };
 
