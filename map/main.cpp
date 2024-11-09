@@ -11,6 +11,7 @@ using namespace std;
 class GraphPanel : public wxPanel
 {
 public:
+
     GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxWHITE), edge_colors(n), node_positions(n)
     {
         // Inicializa as cores das arestas com cores diferentes
@@ -25,26 +26,19 @@ public:
         Bind(wxEVT_SIZE, &GraphPanel::OnResize, this);
     }
 
-    void TopologicalSort()
+    Graph *TopologicalSort()
     {
-        Graph tg = graph->removeNodes(selected_nodes);
-        vector<int> top_order = tg.topologicalSort();
-
-        // for (int node : top_order)
-        // {
-        //     std::cout << node << " ";
-        // }
-
-        //graph->printGraph(modified_adj);
-
+        Graph *new_graph = graph->removeNodes(selected_nodes);
+        vector<int> top_order = new_graph->topologicalSort();
 
         if (top_order.empty())
         {
             cout << "Graph has a cycle!" << endl;
-            return;
+            return {};
         }
 
-        tg.printTopologicalSort(top_order); 
+        new_graph->printTopologicalSort(top_order);
+        return new_graph;
     }
 
 private:
@@ -55,17 +49,6 @@ private:
     vector<wxPoint> node_positions;
     vector<int> selected_nodes;
     int panel_width, panel_height;
-    vector<vector<string>> disciplines = {
-        {"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng"},
-        {"Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS"},
-        {"MN", "Eng Econ", "HC", "TED", "PED", "OO", "MD1"},
-        {"GPeQ", "MDS", "EDA1", "FAC", "MD2", "PI1"},
-        {"IHC", "Requisitos", "SBD1", "FSO", "Compiladores", "EDA2"},
-        {"QSW", "TSW", "Arq e Des", "Redes", "SBD2", "PA"},
-        {"TPPE", "Paradigmas", "FSE", "PSPD"},
-        {"EPS", "GCES", "Estagio"},
-        {"TCC1", "PI2"},
-        {"TCC2"}};
 
     void InitializeNodePositions()
     {
@@ -75,17 +58,17 @@ private:
 
         int x_position = padding; // Inicia a primeira camada na borda esquerda do painel
 
-        for (int semester = 0; semester < disciplines.size(); semester++)
+        for (int semester = 0; semester < graph->disciplines.size(); semester++)
         {
             int y_position = padding; // Inicia a camada no topo do painel
 
             // Para cada disciplina no semestre atual, define a posição do nó
-            for (int node_index = 0; node_index < disciplines[semester].size(); node_index++)
+            for (int node_index = 0; node_index < graph->disciplines[semester].size(); node_index++)
             {
                 int index = 0;
                 for (int i = 0; i < semester; i++)
                 {
-                    index += disciplines[i].size();
+                    index += graph->disciplines[i].size();
                 }
                 index += node_index;
 
@@ -139,6 +122,7 @@ private:
                 // Calcula um ponto intermediário para desviar dos nós
                 // wxPoint mid1((start.x + end.x) / 2, start.y);
                 // wxPoint mid2((start.x + end.x) / 2, end.y);
+
                 wxPoint mid1(start.x, (start.y + end.y) / 2);
                 wxPoint mid2(end.x, (start.y + end.y) / 2);
 
@@ -168,10 +152,15 @@ private:
         // Desenha os nós
         dc.SetPen(wxPen(*wxBLACK, 2));
         int node_index = 0;
-        for (const auto &semester : disciplines)
+        for (const auto &semester : graph->disciplines)
         {
             for (const auto &discipline : semester)
             {
+                if (discipline.empty())
+                {
+                    node_index++;
+                    continue;
+                }
                 dc.SetBrush(wxBrush(node_colors[node_index]));
 
                 dc.DrawRectangle(node_positions[node_index].x - rectWidth / 2,
@@ -261,7 +250,13 @@ private:
             return;
         }
 
-        panel->TopologicalSort();
+        Graph *new_graph = panel->TopologicalSort();
+
+        if (new_graph)
+        {
+            GraphFrame *frame = new GraphFrame("Graph Visualization", new_graph);
+            frame->Show(true);
+        }
     }
 };
 
@@ -288,7 +283,7 @@ public:
         g->addEdge(15, 14);
         g->addEdge(14, 21);
         g->addEdge(16, 19);
-        g->addEdge(16, 35);
+        g->addEdge(16, 37);
         g->addEdge(16, 23);
         g->addEdge(17, 22);
 
@@ -316,8 +311,6 @@ public:
         g->addEdge(33, 39);
 
         g->addEdge(36, 40);
-
-        g->addEdge(40, 44);
 
         g->addEdge(43, 45);
 

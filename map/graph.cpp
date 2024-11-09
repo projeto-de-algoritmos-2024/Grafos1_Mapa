@@ -4,15 +4,28 @@
 #include <queue>
 #include <iostream>
 
-Graph::Graph(int n) : n(n), adj(n)
+Graph::Graph(int n)
+    : n(n),
+      adj(n),
+      disciplines({{"Calculo 1", "APC", "DIAC", "Eng e Amb", "Intro a Eng"},
+                   {"Calculo 2", "Fisica 1", "Fisica Exp", "IAL", "PE", "DS"},
+                   {"MN", "Eng Econ", "HC", "TED", "PED", "OO", "MD1"},
+                   {"GPeQ", "MDS", "EDA1", "FAC", "MD2", "PI1"},
+                   {"IHC", "Requisitos", "SBD1", "FSO", "Compiladores", "EDA2"},
+                   {"QSW", "TSW", "Arq e Des", "Redes", "SBD2", "PA"},
+                   {"TPPE", "Paradigmas", "FSE", "PSPD"},
+                   {"EPS", "GCES", "Estagio"},
+                   {"TCC1", "PI2"},
+                   {"TCC2"}})
 {
 }
 
-Graph::Graph(const std::vector<std::vector<int>> &adj) : adj(adj), n(adj.size())
+Graph::Graph(const std::vector<std::vector<int>> &adj, const std::vector<std::vector<std::string>> &disciplines) : adj(adj), n(adj.size()), disciplines(disciplines)
 {
 }
 
 Graph::~Graph() = default;
+
 void Graph::addEdge(int u, int v)
 {
     if (u < n && v < n && u >= 0 && v >= 0)
@@ -112,14 +125,27 @@ void Graph::printTopologicalSort(std::vector<int> &top_order) const {
     std::cout << std::endl;
 }
 
-Graph Graph::removeNodes(std::vector<int> selected_nodes) const {
-    std::vector<std::vector<int>> new_adj = adj; // Copia a lista de adjacência original
+Graph* Graph::removeNodes(std::vector<int> selected_nodes) const {
 
     // Marcar os nós a serem removidos
     std::vector<bool> to_remove(n, false);
     for (int node : selected_nodes)
     {
         to_remove[node] = true;
+    }
+
+    std::vector<std::vector<std::string>> disciplines_copy = disciplines;
+
+    int node_index = 0;
+    for (int i=0; i < disciplines_copy.size(); i++){
+        for (int j=0; j < disciplines_copy[i].size(); j++){
+            if (to_remove[node_index]){
+                // std::cout << "Removendo " << disciplines[i][j] << std::endl;
+                disciplines_copy[i][j] = ""; 
+            }
+            node_index++;
+        }
+        
     }
 
     // Criar uma nova lista de adjacência apenas com os nós restantes
@@ -138,6 +164,8 @@ Graph Graph::removeNodes(std::vector<int> selected_nodes) const {
             }
         }
     }
-
-    return Graph(remaining_adj);
+    
+    Graph *copy = new Graph(remaining_adj, disciplines_copy);
+    // copy->printGraph(copy->getAdjList());
+    return copy;
 }

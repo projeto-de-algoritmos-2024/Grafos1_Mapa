@@ -2,15 +2,22 @@
 #define GRAPH_H
 
 #include <vector>
+#include <string>
+
+typedef struct Vertex {
+    int index;
+    std::string discipline;
+} Vertex;
 
 class Graph
 {
 public:
+    std::vector<std::vector<std::string>> disciplines;
+
     explicit Graph(int n);
     ~Graph();
 
-    Graph(const std::vector<std::vector<int>> &adj);
-
+    Graph(const std::vector<std::vector<int>> &adj, const std::vector<std::vector<std::string>> &disciplines);
 
     void addEdge(int u, int v);
 
@@ -30,7 +37,7 @@ public:
 
     void printTopologicalSort(std::vector<int> &top_order) const;
 
-    Graph removeNodes(std::vector<int> selected_nodes) const;
+    Graph* removeNodes(std::vector<int> selected_nodes) const;
 
 private:
     std::vector<std::vector<int>> adj;
