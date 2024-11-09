@@ -30,10 +30,10 @@ public:
         Graph tg = graph->removeNodes(selected_nodes);
         vector<int> top_order = tg.topologicalSort();
 
-        for (int node : top_order)
-        {
-            std::cout << node << " ";
-        }
+        // for (int node : top_order)
+        // {
+        //     std::cout << node << " ";
+        // }
 
         //graph->printGraph(modified_adj);
 
@@ -233,7 +233,7 @@ class GraphFrame : public wxFrame
 {
 public:
     GraphFrame(const wxString &title, Graph *graph)
-        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(1500, 700))
+        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(1500, 700)), graph(graph)
     {
         wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
         panel = new GraphPanel(this, graph);
