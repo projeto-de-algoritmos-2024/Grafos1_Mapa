@@ -1,0 +1,11 @@
+version: "3"
+services:
+  app:
+    build: .
+    environment:
+      - DISPLAY=${DISPLAY} # Define a variável DISPLAY para o contêiner
+    volumes:
+      - ./map:/app # Monta o diretório do código-fonte
+      - /tmp/.X11-unix:/tmp/.X11-unix # Permite que o contêiner acesse o servidor X
+    working_dir: /app
+    command: sh -c "g++ main.cpp graph.cpp -o main $(wx-config --cxxflags --libs) && ./main"
