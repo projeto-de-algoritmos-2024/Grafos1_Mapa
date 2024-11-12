@@ -11,14 +11,28 @@ using namespace std;
 class GraphPanel : public wxPanel
 {
 public:
-
-    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxWHITE), edge_colors(n), node_positions(n)
+    GraphPanel(wxWindow *parent, Graph *graph) : wxPanel(parent), graph(graph), n(graph->getSize()), node_colors(n, *wxWHITE), node_positions(n)
     {
+        fixed_colors = {
+            wxColour(255, 0, 0),    // Red
+            wxColour(0, 255, 0),    // Green
+            wxColour(0, 0, 255),    // Blue
+            wxColour(255, 255, 0),  // Yellow
+            wxColour(255, 0, 255),  // Magenta
+            wxColour(0, 255, 255),  // Cyan
+            wxColour(128, 0, 0),    // Maroon
+            wxColour(0, 128, 0),    // Dark Green
+            wxColour(0, 0, 128),    // Navy
+            wxColour(128, 128, 0),  // Olive
+            wxColour(128, 0, 128),  // Purple
+            wxColour(0, 128, 128)   // Teal
+        };
+
         // Inicializa as cores das arestas com cores diferentes
         srand(time(0)); // Inicializa a semente do gerador de números aleatórios
         for (int i = 0; i < n; i++)
         {
-            edge_colors[i] = wxColour(rand() % 256, rand() % 256, rand() % 256);
+            edge_colors.push_back(fixed_colors[i % fixed_colors.size()]);
         }
 
         Bind(wxEVT_PAINT, &GraphPanel::OnPaint, this);
@@ -48,6 +62,7 @@ private:
     vector<wxColor> edge_colors;
     vector<wxPoint> node_positions;
     vector<int> selected_nodes;
+    vector<wxColor> fixed_colors;
     int panel_width, panel_height;
 
     void InitializeNodePositions()
