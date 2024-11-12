@@ -4,8 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/include/wx-3.2",
-                "/usr/local/lib/wx/include/gtk3-unicode-3.2"
+                "/usr/local/include/wx-3.2"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
