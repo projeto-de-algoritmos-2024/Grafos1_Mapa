@@ -9,6 +9,9 @@
 | 21/1061805  |  Guilherme Westphall de Queiroz |
 | 22/1022088  |  Lucas Martins Gabriel |
 
+# Apresentação
+[Vídeo no Youtube.](https://www.youtube.com/watch?v=yHpinOfzODQ&t=5s)
+
 ## Sobre 
 O objetivo do projeto é solucionar exercícios de juiz virutal sobre os algoritmos trabalhados no módulo de grafos 1.
 Obs: Tentamos criar gráfica e aplciar uma ordenação topológica no fluxograma de Engenharia de Software da FGA, porém devido a alguns contratempos iremos entregar apenas os exercícios feitos em plataformas virtuais. 
